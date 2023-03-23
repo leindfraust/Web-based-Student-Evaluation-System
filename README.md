@@ -1,5 +1,5 @@
-# A boilerplate of latest MEVN technologies
-You must specify your own .env file to connect to your MongoDB database. 
+# Web-based Student Evaluation System
+Env file will just be sent on a secure line.
 
 Installed Plugins
 - Babel
