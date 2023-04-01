@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import HelloWorld from '@/components/HelloWorld.vue';
-//import {ref, onMounted} from 'vue'
-//import axios from 'axios';
+import LoginControl from '@/components/LoginControl.vue';
 
 </script>
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App" />
-  </div>
+  <section class="hero is-success is-fullheight">
+    <div class="hero-body">
+      <LoginControl/>
+    </div>
+  </section>
 </template>
+<style scoped>
+.hero {
+  background: url('../assets/background/whole-background.svg') no-repeat center;
+  background-size: cover;
+  height: 100vh;
+}
+</style>

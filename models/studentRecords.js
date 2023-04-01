@@ -4,34 +4,38 @@ const {
 } = mongoose
 
 const studentRecordsSchema = new Schema({
-    StudentIDNo: {
+    studentIDNo: {
         type: String,
         required: true,
         unique: true
     },
-    StudentName: {
+    studentFirstName: {
         type: String,
         required: true
     },
-    StudentAddress: {
+    studentLastName: {
         type: String,
         required: true
     },
-    StudentYearLevel: {
+    studentAddress: {
         type: String,
         required: true
     },
-    StudentCourse: {
+    studentYearLevel: {
         type: String,
         required: true
     },
-    StudentEmail: {
+    studentCourse: {
         type: String,
         required: true
     },
-    StudentSubjectsEnrolled: Array
+    studentEmail: {
+        type: String,
+        required: true
+    },
+    studentSubjectsEnrolled: Array
 })
 
-const studentRecords = mongoose.model('booking', studentRecordsSchema);
+const studentRecords = mongoose.model('studentRecords', studentRecordsSchema);
 
 module.exports = studentRecords

@@ -1,5 +1,6 @@
 require('dotenv').config()
 const express = require('express')
+const session = require('express-session');
 const app = express()
 const morgan = require('morgan')
 const cors = require('cors');
@@ -57,14 +58,21 @@ if (app.get('env') === 'production') {
 }
 
 app.use(session(sess));
+const sessAccount = require('./sessions/accountSession')
+
+app.use('/session', sessAccount)
 
 //APIs
 
 //routes
 const studentRecords = require('./routes/api/studentRecords')
+const dynamicAccounts = require('./routes/api/dynamicAccounts')
+const logActivity = require('./routes/api/logActivity')
 
 //API usages
 app.use('/api/student-records', studentRecords)
+app.use('/api/account', dynamicAccounts)
+app.use('/api/logs', logActivity)
 
 //connect to MongoDB
 const dbConnect = async () => {
