@@ -1,6 +1,6 @@
-const StudentRecordsList = require('../models/studentRecords');
+const StudentRecordsList = require('../models/studentRecords')
 
-const getStudentRecords = (async (req, res) => {
+const getStudentRecords = async (req, res) => {
     try {
         const studentRecordsList = await StudentRecordsList.find()
         if (!studentRecordsList) throw new Error('no items')
@@ -8,9 +8,19 @@ const getStudentRecords = (async (req, res) => {
     } catch (err) {
         res.status(500).send(err)
     }
-});
+}
 
-const pushStudentRecords = (async (req, res) => {
+const inquireStudentRecord = async (req, res) => {
+    try {
+        const studentRecordsList = await StudentRecordsList.findOne({ studentIDNo: req.body.id })
+        if (!studentRecordsList) throw new Error('no items')
+        res.status(200).send(studentRecordsList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+}
+
+const pushStudentRecords = async (req, res) => {
     const newStudentRecords = new StudentRecordsList(req.body)
     try {
         const studentRecordsList = await newStudentRecords.save()
@@ -19,9 +29,9 @@ const pushStudentRecords = (async (req, res) => {
     } catch (err) {
         res.status(500).send(err)
     }
-});
+}
 
-const updateStudentRecords = (async (req, res) => {
+const updateStudentRecords = async (req, res) => {
     const {
         id
     } = req.params
@@ -32,9 +42,9 @@ const updateStudentRecords = (async (req, res) => {
     } catch (err) {
         res.status(500).send(err)
     }
-});
+}
 
-const deleteStudentRecords = (async (req, res) => {
+const deleteStudentRecords = async (req, res) => {
     const {
         id
     } = req.params
@@ -45,10 +55,11 @@ const deleteStudentRecords = (async (req, res) => {
     } catch (err) {
         res.status(500).send(err)
     }
-});
+}
 
 module.exports = {
     getStudentRecords,
+    inquireStudentRecord,
     pushStudentRecords,
     updateStudentRecords,
     deleteStudentRecords

@@ -2,12 +2,15 @@ const express = require('express');
 const router = express.Router();
 const {
     getStudentRecords,
+    inquireStudentRecord,
     pushStudentRecords,
     updateStudentRecords,
     deleteStudentRecords
 } = require('../../controllers/studentRecordsController')
 
 router.get('/', getStudentRecords);
+
+router.post('/inquire', inquireStudentRecord)
 
 router.post('/', pushStudentRecords);
 
