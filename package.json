@@ -1,7 +1,7 @@
 {
-  "name": "mevn-boilerplate-typescript-vue3",
+  "name": "web-based-student-evaluation-system",
   "version": "1.0.0",
-  "description": "a boilerplate of mevn stack, made for releasing in heroku",
+  "description": "a web-based student evaluator for NORSU-CAS",
   "main": "index.js",
   "scripts": {
     "server": "nodemon index.js --ignore 'client/",
@@ -10,7 +10,7 @@
     "start": "node index.js"
   },
   "author": "Romel Jr Zerna",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "dependencies": {
     "concurrently": "^7.6.0",
     "connect-history-api-fallback": "^2.0.0",
@@ -22,6 +22,10 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "eslint": "^8.37.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1",
     "nodemon": "^2.0.22"
   }
 }
