@@ -5,7 +5,6 @@ const {
     pushLogActivity,
     updateLogActivity,
     deleteLogActivity,
-    authDynamicAccount
 } = require('../../controllers/logActivityController')
 
 router.get('/', getLogActivity);
