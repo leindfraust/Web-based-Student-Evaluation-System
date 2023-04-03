@@ -13,7 +13,6 @@ const getStudentRecords = async (req, res) => {
 const inquireStudentRecord = async (req, res) => {
     try {
         const studentRecordsList = await StudentRecordsList.findOne({ studentIDNo: req.body.id })
-        if (!studentRecordsList) throw new Error('no items')
         res.status(200).send(studentRecordsList)
     } catch (err) {
         res.status(500).send(err)
