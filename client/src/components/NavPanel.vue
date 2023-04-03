@@ -22,7 +22,7 @@ async function logout() {
     <nav class="navbar is-hidden-desktop">
         <div class="navbar-brand">
             <a class="navbar-item">
-                <label class="label">{{ handlerName }}</label>
+                <label class="label">{{ handlerName }} ({{ handlerType }})</label>
             </a>
             <a role="button" class="navbar-burger" :class="{ 'is-active': isActiveNavMobile }" aria-label="menu"
                 aria-expanded="false" data-target="navbar" @click="isActiveNavMobile = !isActiveNavMobile">
@@ -39,6 +39,7 @@ async function logout() {
             <img src="../assets/logos/CASlogo.png" />
         </figure>
         <h2 class="title is-2 has-text-centered has-text-white is-hidden-mobile">{{ handlerName }}</h2>
+        <p class="subtitle has-text-centered has-text-white is-hidden-mobile">({{ handlerType }})</p>
         <hr />
         <br />
         <ul class="menu-list has-text-centered" v-if="handlerType === 'admin'">
