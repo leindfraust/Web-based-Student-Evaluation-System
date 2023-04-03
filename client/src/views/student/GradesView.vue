@@ -35,7 +35,7 @@ onMounted(async () => {
                 <section class="section">
                     <div class="container">
                         <CatchErr :err-code="errCode" :err-message="errMsg" />
-                        <table class="table-container">
+                        <table class="table-container" v-if="studentSubjectsEnrolled">
                             <div class="table is-fullwidth">
                                 <thead>
                                     <tr>
@@ -55,6 +55,9 @@ onMounted(async () => {
                                 </tbody>
                             </div>
                         </table>
+                        <div class="notification is-info" v-else>
+                            No grades yet. Please contact your school administrator or teachers.
+                        </div>
                     </div>
                 </section>
             </div>
