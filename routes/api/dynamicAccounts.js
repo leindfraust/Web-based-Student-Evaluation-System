@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {
     getDynamicAccounts,
+    getDynamicAccount,
     pushDynamicAccounts,
     updateDynamicAccounts,
     deleteDynamicAccounts,
@@ -9,6 +10,8 @@ const {
 } = require('../../controllers/dynamicAccountsController')
 
 router.post('/auth', authDynamicAccount)
+
+router.post('/inquire', getDynamicAccount)
 
 router.get('/', getDynamicAccounts);
 
