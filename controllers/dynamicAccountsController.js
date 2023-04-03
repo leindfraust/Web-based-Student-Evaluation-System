@@ -13,6 +13,16 @@ const authDynamicAccount = (async (req, res) => {
     }
 })
 
+const getDynamicAccount = (async (req, res) => {
+    try {
+        const dynamicAccountsList = await DynamicAccountsList.findOne({ _id: req.body.id })
+        if (!dynamicAccountsList) throw new Error('no items')
+        res.status(200).send(dynamicAccountsList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+});
+
 const getDynamicAccounts = (async (req, res) => {
     try {
         const dynamicAccountsList = await DynamicAccountsList.find()
@@ -63,6 +73,7 @@ const deleteDynamicAccounts = (async (req, res) => {
 
 module.exports = {
     authDynamicAccount,
+    getDynamicAccount,
     getDynamicAccounts,
     pushDynamicAccounts,
     updateDynamicAccounts,
