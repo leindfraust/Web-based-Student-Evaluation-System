@@ -47,7 +47,7 @@ onMounted(async () => {
 
 const studentSubjectEnrolled = computed(() => inputStudentSubjectsEnrolled.value)
 const studentRecordsFiltered = computed(() => {
-    return studentRecords.value ? studentRecords.value.filter((student: Record<string, string>) => student.studentIDNo.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentFirstName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentLastName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentAddress.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentYearLevel.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentCourse.toLowerCase().includes(searchBar.value.toLowerCase())) : []
+    return studentRecords.value ? studentRecords.value.filter((student: Record<string, string>) => student.studentIDNo.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentFirstName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentLastName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentAddress.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentYearLevel.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentCourse.toLowerCase().includes(searchBar.value.toLowerCase())).sort((a: Record<string, string>, b: Record<string, string>) => a.studentLastName.localeCompare(b.studentLastName)) : []
 })
 
 function addSubjectPrompt() {
@@ -180,9 +180,9 @@ async function deleteStudentRecord() {
         errMsg.value = err.msg
     })
     updateLog(`Deleted student record of ID: ${inputStudentIDNo.value}`, 'DELETE').catch(err => {
-            errCode.value = err.code
-            errMsg.value = err.message
-        })
+        errCode.value = err.code
+        errMsg.value = err.message
+    })
     addStudentControl.value = false
     editStudentControl.value = ''
     clearFields()
