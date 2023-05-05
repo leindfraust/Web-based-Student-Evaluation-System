@@ -13,9 +13,21 @@ interface subjectEnrolled {
     grade: number;
     instructor: string
 }
+interface studentRecord {
+    _id: string,
+    studentIDNo: string;
+    studentLastName: string;
+    studentFirstName: string;
+    studentAddress: string;
+    studentYearLevel: string;
+    studentCourse: string;
+    studentEmail: string;
+    studentSubjectsEnrolled: Array<subjectEnrolled>;
+
+}
 
 const searchBar = ref('')
-const studentRecords = ref()
+const studentRecords = ref(new Array<studentRecord>)
 const errCode = ref('')
 const errMsg = ref('')
 
@@ -47,8 +59,9 @@ onMounted(async () => {
 
 const studentSubjectEnrolled = computed(() => inputStudentSubjectsEnrolled.value)
 const studentRecordsFiltered = computed(() => {
-    return studentRecords.value ? studentRecords.value.filter((student: Record<string, string>) => student.studentIDNo.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentFirstName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentLastName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentAddress.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentYearLevel.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentCourse.toLowerCase().includes(searchBar.value.toLowerCase())).sort((a: Record<string, string>, b: Record<string, string>) => a.studentLastName.localeCompare(b.studentLastName)) : []
+    return studentRecords.value ? searchBar.value ? studentRecords.value.filter((student: studentRecord) => student.studentIDNo.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentFirstName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentLastName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentAddress.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentYearLevel.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentCourse.toLowerCase().includes(searchBar.value.toLowerCase())).sort((a: studentRecord, b: studentRecord) => a.studentLastName.localeCompare(b.studentLastName)) : studentRecords.value : []
 })
+
 
 function addSubjectPrompt() {
     addSubjectControl.value = true
@@ -60,11 +73,11 @@ function addSubjectPrompt() {
 }
 
 function addSubject() {
-    if (!inputStudentSubjectsEnrolled.value.find((subject: subjectEnrolled) => subject.code == inputStudentSubjectCode.value) && inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '' && inputStudentSubjectGrade.value) {
+    if (!inputStudentSubjectsEnrolled.value.find((subject: subjectEnrolled) => subject.code == inputStudentSubjectCode.value) && inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '') {
         inputStudentSubjectsEnrolled.value.push({
             code: inputStudentSubjectCode.value,
             description: inputStudentSubjectDescription.value,
-            grade: parseFloat(inputStudentSubjectGrade.value),
+            grade: inputStudentSubjectGrade.value ? parseFloat(inputStudentSubjectGrade.value) : 0,
             instructor: inputStudentSubjectInstructor.value
         })
         inputStudentSubjectCode.value = ''
@@ -128,7 +141,7 @@ async function addStudentRecord() {
     }
 }
 
-function editStudentRecordModal(record: Record<string, string>) {
+function editStudentRecordModal(record: studentRecord) {
     editStudentControl.value = record._id
     addStudentControl.value = true
     inputStudentIDNo.value = record.studentIDNo
@@ -164,6 +177,7 @@ async function editStudentRecord() {
             errCode.value = err.code
             errMsg.value = err.message
         })
+        addSubjectControl.value = false
         addStudentControl.value = false
         editStudentControl.value = ''
         clearFields()
@@ -200,6 +214,66 @@ function clearFields() {
     inputStudentSubjectCode.value = ''
     inputStudentSubjectDescription.value = ''
     inputStudentSubjectGrade.value = ''
+}
+
+function sortRow(sortType: string) {
+    if (sortType == 'IDNo') {
+        studentRecords.value.sort((a: studentRecord, b: studentRecord) => parseInt(a.studentIDNo) - parseInt(b.studentIDNo))
+    } else if (sortType == 'lastName' || sortType == 'firstName') {
+        studentRecords.value.sort((a: studentRecord, b: studentRecord) => {
+            const name_1 = sortType == 'lastName' ? a.studentLastName.toLowerCase() : a.studentFirstName.toLowerCase()
+            const name_2 = sortType == 'lastName' ? b.studentLastName.toLowerCase() : b.studentFirstName.toLowerCase()
+            return name_1.localeCompare(name_2, undefined, { sensitivity: 'accent' });
+        })
+    } else if (sortType == 'Address') {
+        studentRecords.value.sort(((a: studentRecord, b: studentRecord) => {
+            return a.studentAddress.toLowerCase() === b.studentAddress.toLowerCase() ? 0 : a.studentAddress.toLowerCase() < b.studentAddress.toLowerCase() ? -1 : 1
+        }))
+    } else if (sortType == 'YearLevel') {
+        const romanNumerals = [
+            {
+                I: 1
+            },
+            {
+                II: 2
+            },
+            {
+                III: 3
+
+            },
+            {
+                IV: 4
+            }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ] as any
+        studentRecords.value.sort((a: studentRecord, b: studentRecord) => parseInt(romanNumerals.find((numeral: never) => numeral[a.studentYearLevel])[a.studentYearLevel]) - parseInt(romanNumerals.find((numeral: never) => numeral[b.studentYearLevel])[b.studentYearLevel]))
+    } else if (sortType == 'Course') {
+        studentRecords.value.sort((a: studentRecord, b: studentRecord) => {
+            const course_1 = a.studentCourse.toLowerCase()
+            const course_2 = b.studentCourse.toLowerCase()
+            if (course_1 > course_2) {
+                return 1;
+            }
+            if (course_1 < course_2) {
+                return -1;
+            }
+
+            return 0;
+        })
+    } else if (sortType == 'Email') {
+        studentRecords.value.sort((a: studentRecord, b: studentRecord) => {
+            if (a.studentEmail.toLowerCase() > b.studentEmail.toLowerCase()) {
+                return 1;
+            }
+            if (a.studentEmail.toLowerCase() < b.studentEmail.toLowerCase()) {
+                return -1;
+            }
+
+            return 0;
+        })
+    } else {
+        studentRecords.value.sort()
+    }
 }
 </script>
 <template>
@@ -289,6 +363,7 @@ function clearFields() {
                                     </h3>
                                     <button class="button is-info" @click="addSubjectPrompt">Add
                                         Subject</button>
+                                    <div class="block"></div>
                                     <div class="container" v-if="addSubjectControl">
                                         <div class="field">
                                             <label class="label">
@@ -333,7 +408,7 @@ function clearFields() {
                                             </button>
                                         </div>
                                     </div>
-                                    <table class="table-container">
+                                    <table class="table-container" v-if="Object.keys(studentSubjectEnrolled).length !== 0">
                                         <div class="table is-fullwidth is-hoverable">
                                             <thead>
                                                 <tr>
@@ -363,6 +438,7 @@ function clearFields() {
                                         </div>
                                     </table>
                                 </div>
+                                <br />
                                 <div class="buttons is-centered">
                                     <button class="button is-danger"
                                         @click="addStudentControl = false, clearFields(), editStudentControl = ''">Cancel</button>
@@ -401,13 +477,13 @@ function clearFields() {
                             <table class="table is-fullwidth is-hoverable" v-if="Object.keys(studentRecords).length !== 0">
                                 <thead>
                                     <tr>
-                                        <th>ID No.</th>
-                                        <th>Last Name</th>
-                                        <th>First Name</th>
-                                        <th>Address</th>
-                                        <th>Year Level</th>
-                                        <th>Course</th>
-                                        <th>Email</th>
+                                        <th @click="sortRow('IDNo')">ID No.</th>
+                                        <th @click="sortRow('lastName')">Last Name</th>
+                                        <th @click="sortRow('firstName')">First Name</th>
+                                        <th @click="sortRow('Address')">Address</th>
+                                        <th @click="sortRow('YearLevel')">Year Level</th>
+                                        <th @click="sortRow('Course')">Course</th>
+                                        <th @click="sortRow('Email')">Email</th>
                                         <th>Subjects</th>
                                         <th>GPA</th>
                                     </tr>
