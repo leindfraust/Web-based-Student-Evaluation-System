@@ -26,9 +26,9 @@ onMounted(async () => {
 
 </script>
 <template>
-    <div class="">
+    <div class="container">
         <div class="columns">
-            <div class="column is-2">
+            <div class="column is-4">
                 <NavPanel />
             </div>
             <div class="column">
@@ -41,16 +41,16 @@ onMounted(async () => {
                                     <tr>
                                         <th>Subject Code</th>
                                         <th>Subject Description</th>
-                                        <th>Grade</th>
+                                        <th>GPA</th>
                                         <th>Instructor</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr v-for="subject, index in studentSubjectsEnrolled" :key="index">
-                                        <th>{{ subject.code }}</th>
-                                        <td>{{ subject.description }}</td>
-                                        <td>{{ subject.grade }}</td>
-                                        <td>{{ subject.instructor }}</td>
+                                        <th :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.code }}</th>
+                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.description }}</td>
+                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.grade }}</td>
+                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.instructor }}</td>
                                     </tr>
                                 </tbody>
                             </div>
