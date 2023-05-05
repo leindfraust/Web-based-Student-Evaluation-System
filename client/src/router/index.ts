@@ -59,15 +59,7 @@ const routes: Array<RouteRecordRaw> = [
     meta: {
       requiresAuthAdmin: true
     }
-  },
-  {
-    path: '/admin/support',
-    name: 'adminSupport',
-    component: () => import('../views/admin/SupportView.vue'),
-    meta: {
-      requiresAuthAdmin: true
-    }
-  },
+  }
 ]
 
 const router = createRouter({
