@@ -89,7 +89,7 @@ async function authAccount() {
         </div>
         <div class="field">
             <div class="control">
-                <input class="input" type="password" placeholder="Password" v-model="password" />
+                <input class="input" type="password" placeholder="Password" v-model="password" @keyup.enter="authAccount" />
             </div>
         </div>
         <div class="notification is-warning" v-if="authFailed">
