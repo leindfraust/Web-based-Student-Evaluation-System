@@ -47,7 +47,6 @@ async function logout() {
             <li><router-link :to="{ name: 'adminStudentRecords' }">STUDENT RECORDS</router-link></li>
             <li><router-link :to="{ name: 'adminAccounts' }">ACCOUNTS</router-link></li>
             <li><router-link :to="{ name: 'adminSecurity' }">SECURITY</router-link></li>
-            <li><router-link :to="{ name: 'adminSupport' }">SUPPORT</router-link></li>
             <li><a @click="logout">LOGOUT</a></li>
         </ul>
         <ul class="menu-list has-text-centered" v-else>
