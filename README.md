@@ -1,5 +1,4 @@
 # Web-based Student Evaluation System
-Env file will just be sent on a secure line.
 
 Installed Plugins
 - Babel
