@@ -5,10 +5,13 @@ const {
     inquireStudentRecord,
     pushStudentRecords,
     updateStudentRecords,
-    deleteStudentRecords
+    deleteStudentRecords,
+    getTeacherStudentRecords
 } = require('../../controllers/studentRecordsController')
 
 router.get('/', getStudentRecords);
+
+router.post('/teacher', getTeacherStudentRecords)
 
 router.post('/inquire', inquireStudentRecord)
 

@@ -4,8 +4,11 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import CatchErr from '@/components/CatchErr.vue';
 import { recordLog } from '@/composables/recordLog';
+import { useCredentialsStore } from '@/stores/CredentialInformation';
 
 const { updateLog } = recordLog()
+
+const store = useCredentialsStore() as unknown as Record<string, string>
 
 interface subjectEnrolled {
     code: string;
@@ -25,6 +28,16 @@ interface studentRecord {
     studentSubjectsEnrolled: Array<subjectEnrolled>;
 
 }
+
+interface accountHandler {
+    accountType: string;
+    handler: string;
+    name: string;
+}
+
+const account = store.credentials as unknown as accountHandler
+
+const accountNameRegex = ref()
 
 const searchBar = ref('')
 const studentRecords = ref(new Array<studentRecord>)
@@ -51,10 +64,7 @@ const addSubjectControl = ref(false)
 const editSubjectControl = ref() //the index of the subject of the array
 
 onMounted(async () => {
-    await axios.get('/api/student-records').then(response => studentRecords.value = response.data).catch(err => {
-        errCode.value = err.code
-        errMsg.value = err.msg
-    })
+    await getStudentRecords()
 })
 
 const studentSubjectEnrolled = computed(() => inputStudentSubjectsEnrolled.value)
@@ -62,6 +72,29 @@ const studentRecordsFiltered = computed(() => {
     return studentRecords.value ? searchBar.value ? studentRecords.value.filter((student: studentRecord) => student.studentIDNo.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentFirstName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentLastName.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentAddress.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentYearLevel.toLowerCase().includes(searchBar.value.toLowerCase()) || student.studentCourse.toLowerCase().includes(searchBar.value.toLowerCase())).sort((a: studentRecord, b: studentRecord) => a.studentLastName.localeCompare(b.studentLastName)) : studentRecords.value : []
 })
 
+async function getStudentRecords() {
+    if (account.accountType == 'Teacher') {
+
+        const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*\\s+){1,2}";
+        const regexString = `\\b${namePattern.replace(/\\/g, '')}\\b`;
+
+        const pattern = regexString.replace("%NAME%", account.name);
+
+        accountNameRegex.value = new RegExp(pattern);
+
+        await axios.post('/api/student-records/teacher', {
+            instructor: account.name
+        }).then(response => studentRecords.value = response.data).catch(err => {
+            errCode.value = err.code
+            errMsg.value = err.msg
+        })
+    } else {
+        await axios.get('/api/student-records').then(response => studentRecords.value = response.data).catch(err => {
+            errCode.value = err.code
+            errMsg.value = err.msg
+        })
+    }
+}
 
 function addSubjectPrompt() {
     addSubjectControl.value = true
@@ -128,10 +161,7 @@ async function addStudentRecord() {
             errCode.value = err.code
             errMsg.value = err.message
         })
-        await axios.get('/api/student-records').then(response => studentRecords.value = response.data).catch(err => {
-            errCode.value = err.code
-            errMsg.value = err.msg
-        })
+        await getStudentRecords()
         updateLog(`Added new student record with ID: ${inputStudentIDNo.value}`, 'ADD').catch(err => {
             errCode.value = err.code
             errMsg.value = err.message
@@ -156,23 +186,29 @@ function editStudentRecordModal(record: studentRecord) {
 
 async function editStudentRecord() {
     if (inputStudentIDNo.value !== '' && inputStudentFirstName.value !== '' && inputStudentLastName.value !== '' && inputStudentAddress.value !== '' && inputStudentYearLevel.value !== '' && inputStudentCourse.value !== '' && inputStudentEmail.value !== '') {
-        await axios.put(`/api/student-records/${editStudentControl.value}`, {
-            studentIDNo: inputStudentIDNo.value,
-            studentFirstName: inputStudentFirstName.value,
-            studentLastName: inputStudentLastName.value,
-            studentAddress: inputStudentAddress.value,
-            studentYearLevel: inputStudentYearLevel.value,
-            studentCourse: inputStudentCourse.value,
-            studentEmail: inputStudentEmail.value,
-            studentSubjectsEnrolled: inputStudentSubjectsEnrolled.value
-        }).catch(err => {
-            errCode.value = err.code
-            errMsg.value = err.message
-        })
-        await axios.get('/api/student-records').then(response => studentRecords.value = response.data).catch(err => {
-            errCode.value = err.code
-            errMsg.value = err.msg
-        })
+        if (account.accountType == 'Admin') {
+            await axios.put(`/api/student-records/${editStudentControl.value}`, {
+                studentIDNo: inputStudentIDNo.value,
+                studentFirstName: inputStudentFirstName.value,
+                studentLastName: inputStudentLastName.value,
+                studentAddress: inputStudentAddress.value,
+                studentYearLevel: inputStudentYearLevel.value,
+                studentCourse: inputStudentCourse.value,
+                studentEmail: inputStudentEmail.value,
+                studentSubjectsEnrolled: inputStudentSubjectsEnrolled.value
+            }).catch(err => {
+                errCode.value = err.code
+                errMsg.value = err.message
+            })
+        } else {
+            await axios.put(`/api/student-records/${editStudentControl.value}`, {
+                studentSubjectsEnrolled: inputStudentSubjectsEnrolled.value
+            }).catch(err => {
+                errCode.value = err.code
+                errMsg.value = err.message
+            })
+        }
+        await getStudentRecords()
         updateLog(`Edited student record of ID: ${inputStudentIDNo.value}`, 'EDIT').catch(err => {
             errCode.value = err.code
             errMsg.value = err.message
@@ -288,7 +324,8 @@ function sortRow(sortType: string) {
                         <div class="modal-background"></div>
                         <div class="modal-content">
                             <div class="container box">
-                                <button class="button is-danger is-small" v-if="editStudentControl"
+                                <button class="button is-danger is-small"
+                                    v-if="editStudentControl && account.accountType == 'Admin'"
                                     @click="deleteStudentRecord">DELETE STUDENT INFORMATION</button>
                                 <div class="container is-fluid">
                                     <br />
@@ -298,7 +335,8 @@ function sortRow(sortType: string) {
                                             Student ID No.
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentIDNo" />
+                                            <input class="input" type="text" v-model="inputStudentIDNo"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -306,7 +344,8 @@ function sortRow(sortType: string) {
                                             Student Last Name
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentLastName" />
+                                            <input class="input" type="text" v-model="inputStudentLastName"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -314,7 +353,8 @@ function sortRow(sortType: string) {
                                             Student First Name
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentFirstName" />
+                                            <input class="input" type="text" v-model="inputStudentFirstName"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -322,7 +362,8 @@ function sortRow(sortType: string) {
                                             Student Address
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentAddress" />
+                                            <input class="input" type="text" v-model="inputStudentAddress"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -331,7 +372,8 @@ function sortRow(sortType: string) {
                                         </label>
                                         <div class="control">
                                             <div class="select">
-                                                <select v-model="inputStudentYearLevel">
+                                                <select v-model="inputStudentYearLevel"
+                                                    :disabled="account.accountType !== 'Admin'">
                                                     <option value="I">I</option>
                                                     <option value="II">II</option>
                                                     <option value="III">III</option>
@@ -345,7 +387,8 @@ function sortRow(sortType: string) {
                                             Student Course
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentCourse" />
+                                            <input class="input" type="text" v-model="inputStudentCourse"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -353,7 +396,8 @@ function sortRow(sortType: string) {
                                             Student Email
                                         </label>
                                         <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentEmail" />
+                                            <input class="input" type="text" v-model="inputStudentEmail"
+                                                :disabled="account.accountType !== 'Admin'" />
                                         </div>
                                     </div>
                                 </div>
@@ -361,7 +405,8 @@ function sortRow(sortType: string) {
                                     <br />
                                     <h3 class="title is-3">Subjects Enrolled
                                     </h3>
-                                    <button class="button is-info" @click="addSubjectPrompt">Add
+                                    <button class="button is-info" @click="addSubjectPrompt"
+                                        v-if="account.accountType == 'Admin'">Add
                                         Subject</button>
                                     <div class="block"></div>
                                     <div class="container" v-if="addSubjectControl">
@@ -424,9 +469,11 @@ function sortRow(sortType: string) {
                                                     <th>
                                                         <div class="buttons">
                                                             <button class="button is-info is-small"
-                                                                @click="editSubjectPrompt(subject, index)">Edit</button>
+                                                                @click="editSubjectPrompt(subject, index)"
+                                                                v-if="subject.instructor.match(accountNameRegex)">Edit</button>
                                                             <button class="button is-danger is-small"
-                                                                @click="removeSubject(subject.code)">Remove</button>
+                                                                @click="removeSubject(subject.code)"
+                                                                v-if="account.accountType == 'Admin'">Remove</button>
                                                         </div>
                                                     </th>
                                                     <th>{{ subject.code }}</th>
@@ -467,7 +514,8 @@ function sortRow(sortType: string) {
                             <div class="column">
                                 <div class="field">
                                     <div class="control has-icons-right">
-                                        <button class="button is-medium is-rounded" @click="addStudentControl = true">Add
+                                        <button class="button is-medium is-rounded" @click="addStudentControl = true"
+                                            :disabled="account.accountType !== 'Admin'">Add
                                             Student &nbsp; <i class="fa-solid fa-plus"></i></button>
                                     </div>
                                 </div>

@@ -158,10 +158,11 @@ function clearFields() {
                                 </div>
                                 <div class="field">
                                     <label class="label">
-                                        {{ accountType == 'Student' ? 'Student ID Number' : 'Account Name' }}
+                                        {{ accountType == 'Student' ? 'Student ID Number' : accountType == 'Teacher' ? 'Teacher Full Name' : 'Account Name' }}
                                     </label>
                                     <div class="control">
                                         <input class="input" type="text" v-model="accountName" />
+                                        <div class="help" v-if="accountType == 'Teacher'">LAST NAME, FIRST NAME, MIDDLE INITIAL</div>
                                     </div>
                                 </div>
                                 <div class="field">

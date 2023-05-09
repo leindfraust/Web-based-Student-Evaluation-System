@@ -10,6 +10,25 @@ const getStudentRecords = async (req, res) => {
     }
 }
 
+const getTeacherStudentRecords = async (req, res) => {
+    const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*\\s+){1,2}";
+    const regexString = `\\b${namePattern.replace(/\\/g, '')}\\b`;
+
+    const pattern = regexString.replace("%NAME%", req.body.instructor);
+
+    const instructor = new RegExp(pattern);
+
+    try {
+        const studentRecordsList = await StudentRecordsList.find({
+            "studentSubjectsEnrolled.instructor": instructor
+        })
+        if (!studentRecordsList) throw new Error('no items')
+        res.status(200).send(studentRecordsList)
+    } catch (err) {
+        res.status(500).send(err)
+    }
+}
+
 const inquireStudentRecord = async (req, res) => {
     try {
         const studentRecordsList = await StudentRecordsList.findOne({ studentIDNo: req.body.id })
@@ -58,6 +77,7 @@ const deleteStudentRecords = async (req, res) => {
 
 module.exports = {
     getStudentRecords,
+    getTeacherStudentRecords,
     inquireStudentRecord,
     pushStudentRecords,
     updateStudentRecords,
