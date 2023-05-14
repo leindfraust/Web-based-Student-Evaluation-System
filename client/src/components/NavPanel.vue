@@ -81,6 +81,10 @@ li>a {
     color: white !important;
     margin-bottom: 15%
 }
+li>a:hover {
+    background-color: rgb(31, 31, 31) !important;
+    border-radius: 25px
+}
 
 @media (max-width: 991.98px) {
     .menu {
