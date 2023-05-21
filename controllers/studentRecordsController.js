@@ -11,12 +11,10 @@ const getStudentRecords = async (req, res) => {
 }
 
 const getTeacherStudentRecords = async (req, res) => {
-    const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*\\s+){1,2}";
-    const regexString = `\\b${namePattern.replace(/\\/g, '')}\\b`;
+    const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*)\\s+(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*)";
+    const regexString = `\\b${namePattern.replace(/%NAME%/g, req.body.instructor)}\\b`;
 
-    const pattern = regexString.replace("%NAME%", req.body.instructor);
-
-    const instructor = new RegExp(pattern);
+    const instructor = new RegExp(regexString, "i");
 
     try {
         const studentRecordsList = await StudentRecordsList.find({

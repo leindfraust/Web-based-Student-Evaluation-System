@@ -74,13 +74,10 @@ const studentRecordsFiltered = computed(() => {
 
 async function getStudentRecords() {
     if (account.accountType == 'Teacher') {
+        const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*)\\s+(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*)";
+        const regexString = `\\b${namePattern.replace(/%NAME%/g, account.name)}\\b`;
 
-        const namePattern = "(?:(?:[A-Z][a-z]*|[a-z][A-Z])[A-Za-z]*\\s+){1,2}";
-        const regexString = `\\b${namePattern.replace(/\\/g, '')}\\b`;
-
-        const pattern = regexString.replace("%NAME%", account.name);
-
-        accountNameRegex.value = new RegExp(pattern);
+        accountNameRegex.value = new RegExp(regexString, "i")
 
         await axios.post('/api/student-records/teacher', {
             instructor: account.name
@@ -470,7 +467,14 @@ function sortRow(sortType: string) {
                                                         <div class="buttons">
                                                             <button class="button is-info is-small"
                                                                 @click="editSubjectPrompt(subject, index)"
-                                                                v-if="subject.instructor.match(accountNameRegex)">Edit</button>
+                                                                v-if="subject.instructor.replace(/ .*/, '').toLowerCase() ==
+                                                                    account.name.replace(/ .*/, '').toLowerCase() ||
+                                                                    subject.instructor.split(' ').pop()?.toLowerCase() ==
+                                                                    account.name.split(' ').pop()?.toLowerCase() ||
+                                                                    subject.instructor.replace(/ .*/, '').toLowerCase() ==
+                                                                    account.name.split(' ').pop()?.toLowerCase() ||
+                                                                    account.name.replace(/ .*/, '').toLowerCase() ==
+                                                                    subject.instructor.split(' ').pop()?.toLowerCase() || account.accountType == 'Admin'">Edit</button>
                                                             <button class="button is-danger is-small"
                                                                 @click="removeSubject(subject.code)"
                                                                 v-if="account.accountType == 'Admin'">Remove</button>
