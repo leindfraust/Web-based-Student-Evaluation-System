@@ -47,10 +47,14 @@ onMounted(async () => {
                                 </thead>
                                 <tbody>
                                     <tr v-for="subject, index in studentSubjectsEnrolled" :key="index">
-                                        <th :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.code }}</th>
-                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.description }}</td>
-                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.grade }}</td>
-                                        <td :class="{ 'has-text-danger': subject.grade <= 0 }">{{ subject.instructor }}</td>
+                                        <th :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                            {{ subject.code }}</th>
+                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                            {{ subject.description }}</td>
+                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                            {{ subject.grade }}</td>
+                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">{{
+                                            subject.instructor }}</td>
                                     </tr>
                                 </tbody>
                             </div>
@@ -61,6 +65,5 @@ onMounted(async () => {
                     </div>
                 </section>
             </div>
-        </div>
     </div>
-</template>
+</div></template>

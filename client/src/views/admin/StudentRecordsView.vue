@@ -13,7 +13,7 @@ const store = useCredentialsStore() as unknown as Record<string, string>
 interface subjectEnrolled {
     code: string;
     description: string;
-    grade: number;
+    grade: string;
     instructor: string
 }
 interface studentRecord {
@@ -55,7 +55,7 @@ const inputStudentEmail = ref('')
 const inputStudentSubjectsEnrolled = ref(new Array<subjectEnrolled>)
 const inputStudentSubjectCode = ref('')
 const inputStudentSubjectDescription = ref('')
-const inputStudentSubjectGrade = ref()
+const inputStudentSubjectGrade = ref('')
 const inputStudentSubjectInstructor = ref('')
 
 const addStudentControl = ref(false)
@@ -107,7 +107,7 @@ function addSubject() {
         inputStudentSubjectsEnrolled.value.push({
             code: inputStudentSubjectCode.value,
             description: inputStudentSubjectDescription.value,
-            grade: inputStudentSubjectGrade.value ? parseFloat(inputStudentSubjectGrade.value) : 0,
+            grade: parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value,
             instructor: inputStudentSubjectInstructor.value
         })
         inputStudentSubjectCode.value = ''
@@ -129,7 +129,7 @@ function editSubjectPrompt(subject: subjectEnrolled, i: number) {
 function editSubject() {
     studentSubjectEnrolled.value[editSubjectControl.value].code = inputStudentSubjectCode.value
     studentSubjectEnrolled.value[editSubjectControl.value].description = inputStudentSubjectDescription.value
-    studentSubjectEnrolled.value[editSubjectControl.value].grade = inputStudentSubjectGrade.value
+    studentSubjectEnrolled.value[editSubjectControl.value].grade = parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value
     studentSubjectEnrolled.value[editSubjectControl.value].instructor = inputStudentSubjectInstructor.value
     addSubjectControl.value = false
     editSubjectControl.value = undefined
@@ -425,11 +425,22 @@ function sortRow(sortType: string) {
                                         </div>
                                         <div class="field">
                                             <label class="label">
-                                                Grade
+                                                Grade <span class="has-text-info"
+                                                    v-if="inputStudentSubjectGrade == 'NG' || inputStudentSubjectGrade == 'INC'">{{
+                                                        inputStudentSubjectGrade }}</span><span class="delete is-small"
+                                                    @click="inputStudentSubjectGrade = ''"
+                                                    v-if="inputStudentSubjectGrade == 'NG' || inputStudentSubjectGrade == 'INC'"></span>
                                             </label>
-                                            <div class="control">
+                                            <div class="control"
+                                                v-if="inputStudentSubjectGrade !== 'NG' && inputStudentSubjectGrade !== 'INC'">
                                                 <input class="input" type="number" v-model="inputStudentSubjectGrade" />
                                             </div>
+                                            <button class="button is-small has-text-danger"
+                                                @click="inputStudentSubjectGrade = 'NG'"
+                                                :class="{ 'i-active': inputStudentSubjectGrade == 'NG' }">NG</button><button
+                                                class="button is-small has-text-warning"
+                                                @click="inputStudentSubjectGrade = 'INC'"
+                                                :class="{ 'i-active': inputStudentSubjectGrade == 'INC' }">INC</button>
                                         </div>
                                         <div class="field">
                                             <label class="label">
