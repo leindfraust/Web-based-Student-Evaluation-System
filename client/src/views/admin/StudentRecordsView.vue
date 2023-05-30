@@ -4,6 +4,7 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import CatchErr from '@/components/CatchErr.vue';
 import { recordLog } from '@/composables/recordLog';
+import { capitalizeFirstLetter } from '@/composables/upperCaseFirstLetter';
 import { useCredentialsStore } from '@/stores/CredentialInformation';
 
 const { updateLog } = recordLog()
@@ -29,6 +30,13 @@ interface studentRecord {
 
 }
 
+interface subjectRecord {
+    code: string;
+    description: string;
+    instructors: Array<string>;
+}
+
+
 interface accountHandler {
     accountType: string;
     handler: string;
@@ -40,7 +48,8 @@ const account = store.credentials as unknown as accountHandler
 const accountNameRegex = ref()
 
 const searchBar = ref('')
-const studentRecords = ref(new Array<studentRecord>)
+const studentRecords = ref<Array<studentRecord>>([])
+const subjectRecords = ref<Array<subjectRecord>>([])
 const errCode = ref('')
 const errMsg = ref('')
 
@@ -52,10 +61,16 @@ const inputStudentYearLevel = ref('I')
 const inputStudentCourse = ref('')
 const inputStudentEmail = ref('')
 
+const inputStudentSubject = ref<subjectRecord>({} as subjectRecord)
 const inputStudentSubjectsEnrolled = ref(new Array<subjectEnrolled>)
+
 const inputStudentSubjectCode = ref('')
 const inputStudentSubjectDescription = ref('')
+const inputStudentSubjectInstructors = ref<Array<string>>([])
+
 const inputStudentSubjectGrade = ref('')
+const inputStudentSubjectGradeDropdown = ref(false)
+
 const inputStudentSubjectInstructor = ref('')
 
 const addStudentControl = ref(false)
@@ -90,6 +105,21 @@ async function getStudentRecords() {
             errCode.value = err.code
             errMsg.value = err.msg
         })
+    }
+}
+
+function studentSubjectBind() {
+    inputStudentSubjectCode.value = inputStudentSubject.value.code
+    inputStudentSubjectDescription.value = inputStudentSubject.value.description
+    inputStudentSubjectInstructors.value = inputStudentSubject.value.instructors ? [...inputStudentSubject.value.instructors] : []
+}
+
+async function getSubjectRecords() {
+    try {
+        await axios.get('/api/subject-records').then(response => subjectRecords.value = response.data)
+    } catch (err: unknown) {
+        errCode.value = (err as Error).name
+        errMsg.value = (err as Error).message
     }
 }
 
@@ -168,7 +198,8 @@ async function addStudentRecord() {
     }
 }
 
-function editStudentRecordModal(record: studentRecord) {
+async function editStudentRecordModal(record: studentRecord) {
+    await getSubjectRecords()
     editStudentControl.value = record._id
     addStudentControl.value = true
     inputStudentIDNo.value = record.studentIDNo
@@ -342,7 +373,8 @@ function sortRow(sortType: string) {
                                         </label>
                                         <div class="control">
                                             <input class="input" type="text" v-model="inputStudentLastName"
-                                                :disabled="account.accountType !== 'Admin'" />
+                                                :disabled="account.accountType !== 'Admin'"
+                                                @input="inputStudentLastName = capitalizeFirstLetter(inputStudentLastName)" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -351,7 +383,8 @@ function sortRow(sortType: string) {
                                         </label>
                                         <div class="control">
                                             <input class="input" type="text" v-model="inputStudentFirstName"
-                                                :disabled="account.accountType !== 'Admin'" />
+                                                :disabled="account.accountType !== 'Admin'"
+                                                @input="inputStudentFirstName = capitalizeFirstLetter(inputStudentFirstName)" />
                                         </div>
                                     </div>
                                     <div class="field">
@@ -412,7 +445,15 @@ function sortRow(sortType: string) {
                                                 Subject Code
                                             </label>
                                             <div class="control">
-                                                <input class="input" type="text" v-model="inputStudentSubjectCode" />
+                                                <div class="select" @change="studentSubjectBind">
+                                                    <select v-model="inputStudentSubject">
+                                                        <option :value="{}">
+                                                            Select</option>
+                                                        <option v-for="record in subjectRecords" :key="record"
+                                                            :value="record">
+                                                            {{ record.code }}</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="field">
@@ -420,36 +461,68 @@ function sortRow(sortType: string) {
                                                 Subject Description
                                             </label>
                                             <div class="control">
-                                                <input class="input" type="text" v-model="inputStudentSubjectDescription" />
+                                                <input class="input" type="text" v-model="inputStudentSubjectDescription"
+                                                    disabled />
                                             </div>
                                         </div>
                                         <div class="field">
-                                            <label class="label">
-                                                Grade <span class="has-text-info"
-                                                    v-if="inputStudentSubjectGrade == 'NG' || inputStudentSubjectGrade == 'INC'">{{
-                                                        inputStudentSubjectGrade }}</span><span class="delete is-small"
-                                                    @click="inputStudentSubjectGrade = ''"
-                                                    v-if="inputStudentSubjectGrade == 'NG' || inputStudentSubjectGrade == 'INC'"></span>
-                                            </label>
-                                            <div class="control"
-                                                v-if="inputStudentSubjectGrade !== 'NG' && inputStudentSubjectGrade !== 'INC'">
-                                                <input class="input" type="number" v-model="inputStudentSubjectGrade" />
+                                            <label class="label">Grade</label>
+                                            <div class="control">
+
+                                                <div class="dropdown"
+                                                    :class="{ 'is-active': inputStudentSubjectGradeDropdown }">
+                                                    <div class="dropdown-trigger"
+                                                        @click="inputStudentSubjectGradeDropdown = !inputStudentSubjectGradeDropdown">
+                                                        <button class="button" aria-haspopup="true">
+                                                            <span>{{ inputStudentSubjectGrade ? inputStudentSubjectGrade :
+                                                                'Select' }}</span>
+                                                            <span class="icon is-small">
+                                                                <i class="fas fa-angle-down" aria-hidden="true"></i>
+                                                            </span>
+                                                        </button>
+                                                    </div>
+                                                    <div class="dropdown-menu" role="menu">
+                                                        <div class="dropdown-content">
+                                                            <div class="dropdown-item has-text-weight-bold">
+                                                                <a
+                                                                    @click="inputStudentSubjectGrade = 'NG', inputStudentSubjectGradeDropdown = false">NG(No
+                                                                    Grade)</a>
+                                                            </div>
+                                                            <hr class="dropdown-divider">
+                                                            <div class="dropdown-item has-text-weight-bold">
+                                                                <a
+                                                                    @click="inputStudentSubjectGrade = 'INC', inputStudentSubjectGradeDropdown = false">INC(Incomplete)</a>
+                                                            </div>
+                                                            <hr class="dropdown-divider">
+                                                            <div class="field has-addons">
+                                                                <div class="control">
+                                                                    <input class="input" type="number" placeholder="70-100"
+                                                                        v-model="inputStudentSubjectGrade" />
+                                                                </div>
+                                                                <div class="control">
+                                                                    <button class="button is-info"
+                                                                        @click="inputStudentSubjectGradeDropdown = false"
+                                                                        :disabled="parseFloat(inputStudentSubjectGrade) < 70 || inputStudentSubjectGrade == 'INC' || inputStudentSubjectGrade == 'NG' || parseFloat(inputStudentSubjectGrade) > 100">Confirm</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <button class="button is-small has-text-danger"
-                                                @click="inputStudentSubjectGrade = 'NG'"
-                                                :class="{ 'i-active': inputStudentSubjectGrade == 'NG' }">NG</button><button
-                                                class="button is-small has-text-warning"
-                                                @click="inputStudentSubjectGrade = 'INC'"
-                                                :class="{ 'i-active': inputStudentSubjectGrade == 'INC' }">INC</button>
                                         </div>
                                         <div class="field">
                                             <label class="label">
                                                 Subject Instructor
                                             </label>
                                             <div class="control">
-                                                <input class="input" type="text" v-model="inputStudentSubjectInstructor" />
+                                                <div class="select">
+                                                    <select v-model="inputStudentSubjectInstructor">
+                                                        <option value="">Select Instructor</option>
+                                                        <option v-for="instructor in inputStudentSubjectInstructors"
+                                                            :key="instructor">{{ instructor }}</option>
+                                                    </select>
+                                                </div>
                                             </div>
-                                            <p class="help">LAST NAME, FIRST NAME, MIDDLE INITIAL</p>
                                         </div>
                                         <div class="buttons is-right">
                                             <button class="button is-danger is-light"
@@ -529,7 +602,8 @@ function sortRow(sortType: string) {
                             <div class="column">
                                 <div class="field">
                                     <div class="control has-icons-right">
-                                        <button class="button is-medium is-rounded" @click="addStudentControl = true"
+                                        <button class="button is-medium is-rounded"
+                                            @click="addStudentControl = true, getSubjectRecords()"
                                             :disabled="account.accountType !== 'Admin'">Add
                                             Student &nbsp; <i class="fa-solid fa-plus"></i></button>
                                     </div>
@@ -569,8 +643,15 @@ function sortRow(sortType: string) {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ record.studentSubjectsEnrolled.reduce((a: number, b: any) => a + (b.grade /
-                                            record.studentSubjectsEnrolled.length), 0) }}</td>
+                                        <td>{{ record.studentSubjectsEnrolled.reduce((a: number, b: any) => {
+                                            if (typeof (b.grade) === 'number') {
+                                                return a + (b.grade / record.studentSubjectsEnrolled.length)
+                                            }
+                                            else {
+                                                return a
+                                            }
+                                        }, 0)
+                                        }}</td>
                                     </tr>
                                 </tbody>
                             </table>

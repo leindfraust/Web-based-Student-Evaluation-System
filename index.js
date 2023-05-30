@@ -62,11 +62,13 @@ app.use('/session', sessAccount)
 // APIs
 
 // routes
+const subjectRecords = require('./routes/api/subjectRecords')
 const studentRecords = require('./routes/api/studentRecords')
 const dynamicAccounts = require('./routes/api/dynamicAccounts')
 const logActivity = require('./routes/api/logActivity')
 
 // API usages
+app.use('/api/subject-records', subjectRecords)
 app.use('/api/student-records', studentRecords)
 app.use('/api/account', dynamicAccounts)
 app.use('/api/logs', logActivity)
