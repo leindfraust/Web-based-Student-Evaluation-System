@@ -47,14 +47,19 @@ onMounted(async () => {
                                 </thead>
                                 <tbody>
                                     <tr v-for="subject, index in studentSubjectsEnrolled" :key="index">
-                                        <th :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                        <th
+                                            :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' || subject.grade < 74 }">
                                             {{ subject.code }}</th>
-                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                        <td
+                                            :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' || subject.grade < 74 }">
                                             {{ subject.description }}</td>
-                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">
+                                        <td
+                                            :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' || subject.grade < 74 }">
                                             {{ subject.grade }}</td>
-                                        <td :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' }">{{
-                                            subject.instructor }}</td>
+                                        <td
+                                            :class="{ 'has-text-danger': subject.grade == 'NG' || subject.grade == 'INC' || subject.grade < 74 }">
+                                            {{
+                                                subject.instructor }}</td>
                                     </tr>
                                 </tbody>
                             </div>
@@ -63,7 +68,7 @@ onMounted(async () => {
                             No grades yet. Please contact your school administrator or teachers.
                         </div>
                     </div>
-                </section>
-            </div>
+            </section>
+        </div>
     </div>
 </div></template>
