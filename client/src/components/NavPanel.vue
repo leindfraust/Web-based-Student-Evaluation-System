@@ -43,8 +43,8 @@ async function logout() {
         <hr />
         <br />
         <ul class="menu-list has-text-centered" v-if="handlerType === 'admin'">
-            <li><router-link :to="{ name: 'adminDashboard' }">OVERVIEW</router-link></li>
             <li><router-link :to="{ name: 'adminStudentRecords' }">STUDENT RECORDS</router-link></li>
+            <li><router-link :to="{ name: 'adminSubjectRecords' }">SUBJECT RECORDS</router-link></li>
             <li><router-link :to="{ name: 'adminAccounts' }">ACCOUNTS</router-link></li>
             <li><router-link :to="{ name: 'adminSecurity' }">SECURITY</router-link></li>
             <li><a @click="logout">LOGOUT</a></li>
@@ -81,6 +81,7 @@ li>a {
     color: white !important;
     margin-bottom: 15%
 }
+
 li>a:hover {
     background-color: rgb(31, 31, 31) !important;
     border-radius: 25px

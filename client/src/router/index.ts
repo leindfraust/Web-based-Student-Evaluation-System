@@ -29,17 +29,17 @@ const routes: Array<RouteRecordRaw> = [
   },
   //Admin paths
   {
-    path: '/admin/dashboard',
-    name: 'adminDashboard',
-    component: () => import('../views/admin/DashboardView.vue'),
+    path: '/admin/records',
+    name: 'adminStudentRecords',
+    component: () => import('../views/admin/StudentRecordsView.vue'),
     meta: {
       requiresAuthAdmin: true
     }
   },
   {
-    path: '/admin/records',
-    name: 'adminStudentRecords',
-    component: () => import('../views/admin/StudentRecordsView.vue'),
+    path: '/admin/subjects',
+    name: 'adminSubjectRecords',
+    component: () => import('../views/admin/SubjectRecordsView.vue'),
     meta: {
       requiresAuthAdmin: true
     }

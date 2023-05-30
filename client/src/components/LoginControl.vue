@@ -21,7 +21,7 @@ onMounted(async () => {
         if (response.data.data !== undefined) {
             if (response.data.data.handler == 'admin') {
                 store.$patch({ credentials: response.data })
-                await router.push({ name: 'adminDashboard' })
+                await router.push({ name: 'adminStudentRecords' })
             } else if (response.data.handler == 'student') {
                 store.$patch({ credentials: response.data })
                 await router.push({ name: 'studentGrades' })
@@ -53,7 +53,7 @@ async function authAccount() {
                         }
                     })
                     store.$patch({ credentials: response.data })
-                    await router.push({ name: 'adminDashboard' })
+                    await router.push({ name: 'adminStudentRecords' })
                 } else {
                     await axios.post('/session', {
                         data: {
