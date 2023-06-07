@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import NavPanel from '@/components/NavPanel.vue';
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onBeforeMount } from 'vue'
 import axios from 'axios'
 import CatchErr from '@/components/CatchErr.vue';
 import { useCredentialsStore } from '@/stores/CredentialInformation';
@@ -19,7 +19,7 @@ const errCode = ref('')
 const logSearchable = computed(() => {
     return logs.value ? logs.value.filter((log: Record<string, string>) => log.handlerID.toLowerCase().includes(searchBar.value.toLowerCase()) || log.handlerName.toLowerCase().includes(searchBar.value.toLowerCase()) || log.activity.toLowerCase().includes(searchBar.value.toLowerCase())) : []
 })
-onMounted(async () => {
+onBeforeMount(async () => {
     await axios.get('/api/logs').then(response => logs.value = response.data).catch(err => {
         errMsg.value = err.message
         errCode.value = err.code
@@ -45,7 +45,7 @@ onMounted(async () => {
                             </span>
                         </div>
                     </div>
-                    <div class="container" v-if="logs">
+                    <div class="container">
                         <div class="notification" v-for="log in logSearchable.reverse()" :key="log._id"
                             :class="{ 'is-info': log.type == 'EDIT', 'is-success': log.type == 'ADD', 'is-danger': log.type == 'DELETE' }">
                             <b>{{ handlerID == log.handlerID ? log.handlerName + '(You)' : log.handlerName }}</b>:

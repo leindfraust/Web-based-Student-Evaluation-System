@@ -2,7 +2,7 @@
 import axios from 'axios'
 import NavPanel from '@/components/NavPanel.vue';
 import { capitalizeFirstLetter } from '@/composables/upperCaseFirstLetter';
-import { onMounted, ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect, computed, onBeforeMount } from 'vue';
 import CatchErr from '@/components/CatchErr.vue';
 
 interface subjectRecord {
@@ -29,7 +29,7 @@ const errCode = ref('')
 
 const validFields = ref(false)
 
-onMounted(async () => {
+onBeforeMount(async () => {
     await axios.get('/api/subject-records').then(response => {
         subjectRecords.value = response.data
     })
@@ -229,7 +229,7 @@ function deleteSubjectInstructor(instructor: string) {
                             <button class="modal-close is-large" aria-label="close"></button>
                         </div>
 
-                        <div class="table-container" v-if="subjectRecords">
+                        <div class="table-container">
                             <table class="table is-fullwidth is-hoverable" v-if="Object.keys(subjectRecords).length !== 0">
                                 <thead>
                                     <tr>

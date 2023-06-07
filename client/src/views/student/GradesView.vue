@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import NavPanel from '@/components/NavPanel.vue';
-import { ref, onMounted } from 'vue'
+import { ref, onBeforeMount } from 'vue'
 import axios from 'axios'
 import { useCredentialsStore } from '@/stores/CredentialInformation';
 import CatchErr from '@/components/CatchErr.vue';
@@ -15,7 +15,7 @@ const studentSubjectsEnrolled = ref()
 const errCode = ref('')
 const errMsg = ref('')
 
-onMounted(async () => {
+onBeforeMount(async () => {
     await axios.post(`/api/student-records/inquire`, {
         id: handlerID.value
     }).then(response => studentSubjectsEnrolled.value = response.data.studentSubjectsEnrolled).catch(err => {
@@ -41,7 +41,7 @@ onMounted(async () => {
                                     <tr>
                                         <th>Subject Code</th>
                                         <th>Subject Description</th>
-                                        <th>GPA</th>
+                                        <th>Average</th>
                                         <th>Instructor</th>
                                     </tr>
                                 </thead>
@@ -68,7 +68,8 @@ onMounted(async () => {
                             No grades yet. Please contact your school administrator or teachers.
                         </div>
                     </div>
-            </section>
+                </section>
+            </div>
         </div>
     </div>
-</div></template>
+</template>

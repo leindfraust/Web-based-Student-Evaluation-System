@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import NavPanel from '@/components/NavPanel.vue';
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onBeforeMount } from 'vue'
 import axios from 'axios'
 import CatchErr from '@/components/CatchErr.vue';
 import { recordLog } from '@/composables/recordLog';
@@ -78,7 +78,7 @@ const editStudentControl = ref('') //string type to be used for the document ID
 const addSubjectControl = ref(false)
 const editSubjectControl = ref() //the index of the subject of the array
 
-onMounted(async () => {
+onBeforeMount(async () => {
     await getStudentRecords()
 })
 
@@ -133,7 +133,7 @@ function addSubjectPrompt() {
 }
 
 function addSubject() {
-    if (!inputStudentSubjectsEnrolled.value.find((subject: subjectEnrolled) => subject.code == inputStudentSubjectCode.value) && inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '') {
+    if (!inputStudentSubjectsEnrolled.value.find((subject: subjectEnrolled) => subject.code == inputStudentSubjectCode.value) && inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '' && inputStudentSubjectInstructor.value !== '') {
         inputStudentSubjectsEnrolled.value.push({
             code: inputStudentSubjectCode.value,
             description: inputStudentSubjectDescription.value,
@@ -157,16 +157,18 @@ function editSubjectPrompt(subject: subjectEnrolled, i: number) {
 }
 
 function editSubject() {
-    studentSubjectEnrolled.value[editSubjectControl.value].code = inputStudentSubjectCode.value
-    studentSubjectEnrolled.value[editSubjectControl.value].description = inputStudentSubjectDescription.value
-    studentSubjectEnrolled.value[editSubjectControl.value].grade = parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value
-    studentSubjectEnrolled.value[editSubjectControl.value].instructor = inputStudentSubjectInstructor.value
-    addSubjectControl.value = false
-    editSubjectControl.value = undefined
-    inputStudentSubjectCode.value = ''
-    inputStudentSubjectDescription.value = ''
-    inputStudentSubjectGrade.value = ''
-    inputStudentSubjectInstructor.value = ''
+    if (inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '' && inputStudentSubjectInstructor.value !== '') {
+        studentSubjectEnrolled.value[editSubjectControl.value].code = inputStudentSubjectCode.value
+        studentSubjectEnrolled.value[editSubjectControl.value].description = inputStudentSubjectDescription.value
+        studentSubjectEnrolled.value[editSubjectControl.value].grade = parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value
+        studentSubjectEnrolled.value[editSubjectControl.value].instructor = inputStudentSubjectInstructor.value
+        addSubjectControl.value = false
+        editSubjectControl.value = undefined
+        inputStudentSubjectCode.value = ''
+        inputStudentSubjectDescription.value = ''
+        inputStudentSubjectGrade.value = ''
+        inputStudentSubjectInstructor.value = ''
+    }
 }
 
 function removeSubject(code: string) {
@@ -610,7 +612,7 @@ function sortRow(sortType: string) {
                                 </div>
                             </div>
                         </div>
-                        <div class="table-container" v-if="studentRecords">
+                        <div class="table-container">
                             <table class="table is-fullwidth is-hoverable" v-if="Object.keys(studentRecords).length !== 0">
                                 <thead>
                                     <tr>
@@ -622,7 +624,7 @@ function sortRow(sortType: string) {
                                         <th @click="sortRow('Course')">Course</th>
                                         <th @click="sortRow('Email')">Email</th>
                                         <th>Subjects</th>
-                                        <th>GPA</th>
+                                        <th>Average</th>
                                     </tr>
                                 </thead>
                                 <tbody>

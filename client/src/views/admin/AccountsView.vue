@@ -3,7 +3,7 @@ import NavPanel from '@/components/NavPanel.vue';
 import CatchErr from '@/components/CatchErr.vue';
 import { useCredentialsStore } from '@/stores/CredentialInformation';
 import axios from 'axios'
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onBeforeMount } from 'vue'
 import { recordLog } from '@/composables/recordLog';
 
 const { updateLog } = recordLog()
@@ -28,7 +28,7 @@ const editAccountControl = ref('')
 
 const accountsFiltered = computed(() => accounts.value.filter((account: Record<string, string>) => account.name.toLowerCase().includes(searchBar.value.toLowerCase())))
 
-onMounted(async () => {
+onBeforeMount(async () => {
     await axios.get('/api/account').then(response => accounts.value = response.data).catch(err => {
         errCode.value = err.code
         errMsg.value = err.message
@@ -158,11 +158,13 @@ function clearFields() {
                                 </div>
                                 <div class="field">
                                     <label class="label">
-                                        {{ accountType == 'Student' ? 'Student ID Number' : accountType == 'Teacher' ? 'Teacher Full Name' : 'Account Name' }}
+                                        {{ accountType == 'Student' ? 'Student ID Number' : accountType == 'Teacher' ?
+                                            'Teacher Full Name' : 'Account Name' }}
                                     </label>
                                     <div class="control">
                                         <input class="input" type="text" v-model="accountName" />
-                                        <div class="help" v-if="accountType == 'Teacher'">LAST NAME, FIRST NAME, MIDDLE INITIAL</div>
+                                        <div class="help" v-if="accountType == 'Teacher'">LAST NAME, FIRST NAME, MIDDLE
+                                            INITIAL</div>
                                     </div>
                                 </div>
                                 <div class="field">
@@ -217,7 +219,7 @@ function clearFields() {
                             </div>
                         </div>
 
-                        <div class="table-container" v-if="accounts">
+                        <div class="table-container">
                             <table class="table is-fullwidth is-hoverable" v-if="Object.keys(accounts).length !== 0">
                                 <thead>
                                     <tr>
