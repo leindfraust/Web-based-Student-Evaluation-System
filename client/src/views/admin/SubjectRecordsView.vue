@@ -162,7 +162,8 @@ function deleteSubjectInstructor(instructor: string) {
                             <div class="modal-background"></div>
                             <div class="modal-content box">
                                 <!-- Any other Bulma elements you want -->
-                                <button class="button is-danger is-small" @click="deleteSubjectRecord">Delete
+                                <button class="button is-danger is-small" @click="deleteSubjectRecord"
+                                    v-if="subjectDocID">Delete
                                     Subject</button>
                                 <div class="section">
                                     <h3 class="title is-3">Add Subject</h3>

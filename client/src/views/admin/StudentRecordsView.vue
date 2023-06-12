@@ -137,9 +137,10 @@ function addSubject() {
         inputStudentSubjectsEnrolled.value.push({
             code: inputStudentSubjectCode.value,
             description: inputStudentSubjectDescription.value,
-            grade: parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value,
+            grade: inputStudentSubjectGrade.value,
             instructor: inputStudentSubjectInstructor.value
         })
+        inputStudentSubject.value = {} as subjectRecord
         inputStudentSubjectCode.value = ''
         inputStudentSubjectDescription.value = ''
         inputStudentSubjectGrade.value = ''
@@ -150,25 +151,25 @@ function addSubject() {
 function editSubjectPrompt(subject: subjectEnrolled, i: number) {
     addSubjectControl.value = true
     editSubjectControl.value = i
-    inputStudentSubjectCode.value = subject.code
+    inputStudentSubject.value = subjectRecords.value.find((code: subjectRecord) => code.code == subject.code) as subjectRecord
+    inputStudentSubjectCode.value = inputStudentSubject.value.code
     inputStudentSubjectDescription.value = subject.description
     inputStudentSubjectGrade.value = subject.grade
+    inputStudentSubjectInstructors.value = inputStudentSubject.value.instructors ? [...inputStudentSubject.value.instructors] : []
     inputStudentSubjectInstructor.value = subject.instructor
 }
 
 function editSubject() {
-    if (inputStudentSubjectCode.value !== '' && inputStudentSubjectDescription.value !== '' && inputStudentSubjectInstructor.value !== '') {
-        studentSubjectEnrolled.value[editSubjectControl.value].code = inputStudentSubjectCode.value
-        studentSubjectEnrolled.value[editSubjectControl.value].description = inputStudentSubjectDescription.value
-        studentSubjectEnrolled.value[editSubjectControl.value].grade = parseFloat(inputStudentSubjectGrade.value) == 0 || inputStudentSubjectGrade.value == '' ? inputStudentSubjectGrade.value = 'NG' : inputStudentSubjectGrade.value
-        studentSubjectEnrolled.value[editSubjectControl.value].instructor = inputStudentSubjectInstructor.value
-        addSubjectControl.value = false
-        editSubjectControl.value = undefined
-        inputStudentSubjectCode.value = ''
-        inputStudentSubjectDescription.value = ''
-        inputStudentSubjectGrade.value = ''
-        inputStudentSubjectInstructor.value = ''
-    }
+    studentSubjectEnrolled.value[editSubjectControl.value].description = inputStudentSubjectDescription.value
+    studentSubjectEnrolled.value[editSubjectControl.value].grade = inputStudentSubjectGrade.value
+    studentSubjectEnrolled.value[editSubjectControl.value].instructor = inputStudentSubjectInstructor.value
+    addSubjectControl.value = false
+    editSubjectControl.value = undefined
+    inputStudentSubjectCode.value = ''
+    inputStudentSubjectDescription.value = ''
+    inputStudentSubjectGrade.value = ''
+    inputStudentSubjectInstructor.value = ''
+    inputStudentSubject.value = {} as subjectRecord
 }
 
 function removeSubject(code: string) {
@@ -276,6 +277,7 @@ function clearFields() {
     inputStudentYearLevel.value = 'I'
     inputStudentCourse.value = ''
     inputStudentEmail.value = ''
+    inputStudentSubject.value = {} as subjectRecord
     inputStudentSubjectsEnrolled.value = []
     inputStudentSubjectCode.value = ''
     inputStudentSubjectDescription.value = ''
@@ -326,20 +328,15 @@ function sortRow(sortType: string) {
 
             return 0;
         })
-    } else if (sortType == 'Email') {
-        studentRecords.value.sort((a: studentRecord, b: studentRecord) => {
-            if (a.studentEmail.toLowerCase() > b.studentEmail.toLowerCase()) {
-                return 1;
-            }
-            if (a.studentEmail.toLowerCase() < b.studentEmail.toLowerCase()) {
-                return -1;
-            }
-
-            return 0;
-        })
     } else {
         studentRecords.value.sort()
     }
+}
+function sumAvg(record: studentRecord) {
+    const newRecord = { ...record }
+    const validGrades = newRecord.studentSubjectsEnrolled.filter((item: unknown) => !isNaN(parseFloat((item as Record<string, string>).grade)));
+    const gradesSum = validGrades.reduce((sum: number, item: unknown) => sum + parseFloat((item as Record<string, string>).grade), 0);
+    return gradesSum / validGrades.length;
 }
 </script>
 <template>
@@ -418,9 +415,11 @@ function sortRow(sortType: string) {
                                         <label class="label">
                                             Student Course
                                         </label>
-                                        <div class="control">
-                                            <input class="input" type="text" v-model="inputStudentCourse"
-                                                :disabled="account.accountType !== 'Admin'" />
+                                        <div class="select">
+                                            <select v-model="inputStudentCourse">
+                                                <option value="BSCS">BSCS</option>
+                                                <option value="BSIT">BSIT</option>
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="field">
@@ -448,7 +447,8 @@ function sortRow(sortType: string) {
                                             </label>
                                             <div class="control">
                                                 <div class="select" @change="studentSubjectBind">
-                                                    <select v-model="inputStudentSubject">
+                                                    <select v-model="inputStudentSubject"
+                                                        :disabled="editSubjectControl != undefined">
                                                         <option :value="{}">
                                                             Select</option>
                                                         <option v-for="record in subjectRecords" :key="record"
@@ -484,7 +484,8 @@ function sortRow(sortType: string) {
                                                         </button>
                                                     </div>
                                                     <div class="dropdown-menu" role="menu">
-                                                        <div class="dropdown-content">
+                                                        <div class="dropdown-content"
+                                                            style="max-height: 15rem; overflow: auto">
                                                             <div class="dropdown-item has-text-weight-bold">
                                                                 <a
                                                                     @click="inputStudentSubjectGrade = 'NG', inputStudentSubjectGradeDropdown = false">NG(No
@@ -496,15 +497,13 @@ function sortRow(sortType: string) {
                                                                     @click="inputStudentSubjectGrade = 'INC', inputStudentSubjectGradeDropdown = false">INC(Incomplete)</a>
                                                             </div>
                                                             <hr class="dropdown-divider">
-                                                            <div class="field has-addons">
-                                                                <div class="control">
-                                                                    <input class="input" type="number" placeholder="70-100"
-                                                                        v-model="inputStudentSubjectGrade" />
-                                                                </div>
-                                                                <div class="control">
-                                                                    <button class="button is-info"
-                                                                        @click="inputStudentSubjectGradeDropdown = false"
-                                                                        :disabled="parseFloat(inputStudentSubjectGrade) < 70 || inputStudentSubjectGrade == 'INC' || inputStudentSubjectGrade == 'NG' || parseFloat(inputStudentSubjectGrade) > 100">Confirm</button>
+                                                            <div v-for="grade in 100" :key="grade">
+                                                                <div class="dropdown-item has-text-weight-bold"
+                                                                    v-if="grade >= 75">
+                                                                    <a
+                                                                        @click="inputStudentSubjectGrade = grade.toString(), inputStudentSubjectGradeDropdown = false">
+                                                                        {{
+                                                                            grade }}</a>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -622,13 +621,12 @@ function sortRow(sortType: string) {
                                         <th @click="sortRow('Address')">Address</th>
                                         <th @click="sortRow('YearLevel')">Year Level</th>
                                         <th @click="sortRow('Course')">Course</th>
-                                        <th @click="sortRow('Email')">Email</th>
                                         <th>Subjects</th>
                                         <th>Average</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr v-for="record in studentRecordsFiltered" :key="record._id"
+                                    <tr v-for="record in studentRecordsFiltered" :key="record"
                                         @click="editStudentRecordModal(record)">
                                         <th>{{ record.studentIDNo }}</th>
                                         <td>{{ record.studentLastName }}</td>
@@ -636,23 +634,15 @@ function sortRow(sortType: string) {
                                         <td>{{ record.studentAddress }}</td>
                                         <td>{{ record.studentYearLevel }}</td>
                                         <td>{{ record.studentCourse }}</td>
-                                        <td>{{ record.studentEmail }}</td>
                                         <td>
-                                            <div class="columns">
+                                            <div class="columns" style="max-width: 15rem; overflow: auto">
                                                 <div class="column" v-for="subject in record.studentSubjectsEnrolled"
                                                     :key="subject">
                                                     {{ subject.code }}: {{ subject.grade }}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ record.studentSubjectsEnrolled.reduce((a: number, b: any) => {
-                                            if (typeof (b.grade) === 'number') {
-                                                return a + (b.grade / record.studentSubjectsEnrolled.length)
-                                            }
-                                            else {
-                                                return a
-                                            }
-                                        }, 0)
+                                        <td>{{ sumAvg(record)
                                         }}</td>
                                     </tr>
                                 </tbody>

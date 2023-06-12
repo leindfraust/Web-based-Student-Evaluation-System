@@ -23,7 +23,11 @@ onBeforeMount(async () => {
         errMsg.value = err.message
     })
 })
-
+function sumAvg() {
+    const validGrades = studentSubjectsEnrolled.value.filter((item: unknown) => !isNaN(parseFloat((item as Record<string, string>).grade)));
+    const gradesSum = validGrades.reduce((sum: number, item: unknown) => sum + parseFloat((item as Record<string, string>).grade), 0);
+    return gradesSum / validGrades.length;
+}
 </script>
 <template>
     <div class="container">
@@ -41,7 +45,7 @@ onBeforeMount(async () => {
                                     <tr>
                                         <th>Subject Code</th>
                                         <th>Subject Description</th>
-                                        <th>Average</th>
+                                        <th>Grade</th>
                                         <th>Instructor</th>
                                     </tr>
                                 </thead>
@@ -62,6 +66,10 @@ onBeforeMount(async () => {
                                                 subject.instructor }}</td>
                                     </tr>
                                 </tbody>
+                            </div>
+                            <div class="container">
+                                <p class="subtitle is-3">Average: {{ sumAvg() }}</p>
+                                <p class="help">Only calculates for subjects that have grades.</p>
                             </div>
                         </table>
                         <div class="notification is-info" v-else>
