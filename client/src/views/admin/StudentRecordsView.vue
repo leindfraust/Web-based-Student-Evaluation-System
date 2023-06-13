@@ -418,7 +418,7 @@ function sumAvg(record: studentRecord) {
                                         <div class="select">
                                             <select v-model="inputStudentCourse">
                                                 <option value="BSCS">BSCS</option>
-                                                <option value="BSIT">BSIT</option>
+                                                <option value="BSIT">BSINT</option>
                                             </select>
                                         </div>
                                     </div>
